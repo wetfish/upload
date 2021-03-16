@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->nullable();
             $table->text('pubkey');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

@@ -15,8 +15,8 @@ class CreateFilesTable extends Migration
     {
         Schema::create('files', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
+            $table->string('title')->nullable();
+            $table->text('description')->nullable();
             $table->string('mime_type');
             $table->foreignId('gallery_id')->nullable()->constrained();
             $table->unsignedBigInteger('uploaded_by_user');
