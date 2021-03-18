@@ -29,6 +29,29 @@ class StoreUserRequest extends FormRequest
             'email' => 'nullable|email',
             'pubkey' => 'required|string',
             'description' => 'nullable|string',
+            'signature' => 'required|string',
         ];
+    }
+
+    /**
+     * Check that the signature provided is correct
+     *
+     * @return array
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $name = $this->input('name');
+            $pubkey = $this->input('pubkey');
+            $signature = explode(':', $this->input('signature'));
+
+            if(empty($signature[0]) || $signature[0] != $name) {
+                $validator->errors()->add('signature', 'The signature does not match the provided username.');
+            }
+
+            if(empty($signature[1]) || $signature[1] != $pubkey) {
+                $validator->errors()->add('signature', 'Unable to verify the provided pubkey.');
+            }
+        });
     }
 }

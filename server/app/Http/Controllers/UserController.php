@@ -38,7 +38,10 @@ class UserController extends Controller
         // TODO: Verify that the user has access to a valid private key by making them sign a challenge
         $input = $request->validated();
 
-        dd($input);
+        
+
+        print_r($input);
+        exit;
     }
 
     /**
