@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use phpseclib3\Crypt\RSA;
 
 class TestRegistration extends Command
 {
@@ -33,16 +34,25 @@ class TestRegistration extends Command
     /**
      * Execute the console command.
      *
+     * Equivalent to running: curl -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name": "rachel", "pubkey": "example", "signature": "rachel:signed data"}' -X POST http://upload.local/api/v1/user
+     *
      * @return int
      */
     public function handle()
     {
-        // curl -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name": "rachel", "pubkey": "test", "signature": "rachel:test"}' -X POST http://upload.local/api/v1/user
+        $privateKey = RSA::createKey(4096);
+        $publicKey = $privateKey->getPublicKey();
+        $testUser = "rachel";
+
         $payload = [
-            'name' => 'rachel',
-            'pubkey' => 'test',
-            'signature' => 'rachel:test',
+            'name' => $testUser,
+            'pubkey' => $publicKey->toString('PSS'),
         ];
+
+        $signature = $privateKey->sign(json_encode($payload));
+        $encodedSignature = $testUser . ":" . base64_encode($signature);
+
+        $payload['signature'] = $encodedSignature;
 
         // Set up all of our cURL options
         $request = curl_init(env('APP_URL') . '/api/v1/user');
