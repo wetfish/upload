@@ -68,6 +68,6 @@ class TestRegistration extends Command
         $result = curl_exec($request);
         curl_close($request);
 
-        echo $result;
+        echo "Got result from API: " . $result;
     }
 }
