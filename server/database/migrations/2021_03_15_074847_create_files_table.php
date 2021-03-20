@@ -25,6 +25,7 @@ class CreateFilesTable extends Migration
             $table->string('file_path', 2048);
             $table->string('url_path', 2048);
             $table->string('original_file_name', 2048);
+            $table->string('hash');
             $table->string('read_permission');
             $table->timestamps();
         });

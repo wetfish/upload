@@ -18,6 +18,9 @@ class CreateGalleriesTable extends Migration
             $table->string('url');
             $table->string('title')->nullable();
             $table->text('description')->nullable();
+            $table->unsignedBigInteger('created_by_user');
+            $table->foreign('created_by_user')->references('id')->on('users');
+            $table->string('created_by_ip');
             $table->string('read_permission');
             $table->string('write_permission');
             $table->timestamps();
