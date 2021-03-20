@@ -15,7 +15,7 @@ class User extends Model
     }
 
     // Users can have many galleries
-    public funtion galleries()
+    public function galleries()
     {
         return $this->hasMany('App\Models\Gallery', 'created_by_user');
     }
