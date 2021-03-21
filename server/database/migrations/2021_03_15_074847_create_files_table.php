@@ -19,6 +19,8 @@ class CreateFilesTable extends Migration
             $table->text('description')->nullable();
             $table->string('mime_type');
             $table->foreignId('gallery_id')->nullable()->constrained();
+            $table->unsignedBigInteger('uploaded_by_key');
+            $table->foreign('uploaded_by_key')->references('id')->on('keys');
             $table->unsignedBigInteger('uploaded_by_user');
             $table->foreign('uploaded_by_user')->references('id')->on('users');
             $table->string('uploaded_by_ip');
