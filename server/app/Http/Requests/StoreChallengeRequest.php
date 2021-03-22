@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\Pubkey;
 
 class StoreChallengeRequest extends FormRequest
 {
@@ -26,7 +27,7 @@ class StoreChallengeRequest extends FormRequest
     {
         return [
             'name' => 'nullable',
-            'pubkey' => 'required|string',
+            'pubkey' => ['required', 'string', new Pubkey],
         ];
     }
 }
