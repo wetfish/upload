@@ -16,6 +16,7 @@ class CreateKeysTable extends Migration
         Schema::create('keys', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained();
+            $table->string('hash', 256)->unique();
             $table->text('pubkey');
             $table->unsignedInteger('challenges_requested');
             $table->unsignedInteger('challenges_completed');
