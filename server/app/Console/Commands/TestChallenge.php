@@ -5,21 +5,21 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use phpseclib3\Crypt\RSA;
 
-class TestRegistration extends Command
+class TestChallenge extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'test:registration';
+    protected $signature = 'test:challenge';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'A command for testing user registration by making cURL requests';
+    protected $description = 'A command for testing the creation of pubkeys and API challenges';
 
     /**
      * Create a new command instance.
@@ -34,28 +34,19 @@ class TestRegistration extends Command
     /**
      * Execute the console command.
      *
-     * Equivalent to running: curl -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name": "rachel", "pubkey": "example", "signature": "rachel:signed data"}' -X POST http://upload.local/api/v1/user
-     *
      * @return void
      */
     public function handle()
     {
         $privateKey = RSA::createKey(4096);
         $publicKey = $privateKey->getPublicKey();
-        $testUser = "rachel";
 
         $payload = [
-            'name' => $testUser,
             'pubkey' => $publicKey->toString('PSS'),
         ];
 
-        $signature = $privateKey->sign(json_encode($payload));
-        $encodedSignature = $testUser . ":" . base64_encode($signature);
-
-        $payload['signature'] = $encodedSignature;
-
         // Set up all of our cURL options
-        $request = curl_init(env('APP_URL') . '/api/v1/user');
+        $request = curl_init(env('APP_URL') . '/api/v1/challenge');
         curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($request, CURLOPT_POST, true);
         curl_setopt($request, CURLOPT_POSTFIELDS, json_encode($payload));
@@ -65,9 +56,9 @@ class TestRegistration extends Command
         ));
 
         // Submit the POST request
-        $result = curl_exec($request);
+        $response = curl_exec($request);
         curl_close($request);
 
-        echo "Got result from API: " . $result;
+        echo "Got response from API: " . $response;
     }
 }

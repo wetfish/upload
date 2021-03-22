@@ -16,7 +16,8 @@ class CreateChallengesTable extends Migration
         Schema::create('challenges', function (Blueprint $table) {
             $table->id();
             $table->foreignId('key_id')->nullable()->constrained();
-            $table->string('challenge');
+            $table->string('created_by_ip');
+            $table->string('string')->unique();
             $table->boolean('completed')->nullable();
             $table->timestamps();
         });

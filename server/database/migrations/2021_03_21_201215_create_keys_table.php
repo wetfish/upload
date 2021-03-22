@@ -18,8 +18,8 @@ class CreateKeysTable extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->string('hash', 256)->unique();
             $table->text('pubkey');
-            $table->unsignedInteger('challenges_requested');
-            $table->unsignedInteger('challenges_completed');
+            $table->unsignedInteger('challenges_requested')->default(0);
+            $table->unsignedInteger('challenges_completed')->default(0);
             $table->timestamps();
         });
     }
