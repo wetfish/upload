@@ -40,6 +40,15 @@ class TestRegistration extends Command
      */
     public function handle()
     {
+        // Generate a keypair
+
+        // Generate a challenge
+
+        // Sign the challenge
+
+        // Submit post request 
+
+
         $privateKey = RSA::createKey(4096);
         $publicKey = $privateKey->getPublicKey();
         $testUser = "rachel";

@@ -39,6 +39,14 @@ class UserController extends Controller
         $input = $request->validated();
         User::create($input);
 
+        // Validate the challenge
+
+        // Create a new user account
+
+        // Associate the pubkey from the challenge with the user account
+
+
+
         return response(null, 201);
     }
 

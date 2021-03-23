@@ -19,8 +19,20 @@ class Challenge extends Model
         $pubkey = PublicKeyLoader::load($this->key()->pubkey);
         $signature = base64_decode($encodedSignature);
 
-        if($pubkey->verify($this->string, $signature)) {
-            return true;
+        // Only validate a challenge if it hasn't been completed yet
+        if(is_null($this->completed)) {
+            if($pubkey->verify($this->string, $signature)) {
+                $this->completed = true;
+                $this->save();
+
+                $this->key()->challenges_completed += 1;
+                $this->key()->save();
+
+                return true;
+            } else {
+                $this->completed = false;
+                $this->save();
+            }
         }
 
         return false;
