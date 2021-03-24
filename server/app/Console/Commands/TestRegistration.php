@@ -63,10 +63,19 @@ class TestRegistration extends Command
      */
     public function handle()
     {
-        // Generate a keypair
-        $privateKey = RSA::createKey(4096);
-        $publicKey = $privateKey->getPublicKey();
-        dump("Keypair generated.");
+        $keyfile = $this->ask('Enter the path to the private key file to be used, or leave this blank and one will be generated for you');
+        $username = $this->ask('Enter the username you would like to register for your account');
+
+        if(empty($keyfile)) {
+            // Generate a keypair
+            $privateKey = RSA::createKey(4096);
+            $publicKey = $privateKey->getPublicKey();
+            dump("Keypair generated");
+        } else {
+            $privateKey = RSA::loadFormat('PSS', file_get_contents($keyfile));
+            $publicKey = $privateKey->getPublicKey();
+            dump("Keypair loaded from {$keyfile}");
+        }
 
         // Generate a challenge
         $response = $this->generateChallenge($publicKey);
@@ -78,7 +87,7 @@ class TestRegistration extends Command
 
         // Submit post request
         $payload = [
-            'name' => "rachel",
+            'name' => $username,
             'challenge' => $response->challenge,
             'signature' => $signature,
         ];

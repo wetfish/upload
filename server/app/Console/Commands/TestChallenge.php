@@ -38,8 +38,18 @@ class TestChallenge extends Command
      */
     public function handle()
     {
-        $privateKey = RSA::createKey(4096);
-        $publicKey = $privateKey->getPublicKey();
+        $keyfile = $this->ask('Enter the path to the private key file to be used, or leave this blank and one will be generated for you');
+
+        if(empty($keyfile)) {
+            // Generate a keypair
+            $privateKey = RSA::createKey(4096);
+            $publicKey = $privateKey->getPublicKey();
+            dump("Keypair generated");
+        } else {
+            $privateKey = RSA::loadFormat('PSS', file_get_contents($keyfile));
+            $publicKey = $privateKey->getPublicKey();
+            dump("Keypair loaded from {$keyfile}");
+        }
 
         $payload = [
             'pubkey' => $publicKey->toString('PSS'),
