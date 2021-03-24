@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Gallery;
 
 class File extends Model
 {
@@ -11,12 +13,12 @@ class File extends Model
     // Files are owned by users
     public function user()
     {
-        return $this->belongsTo('App\Models\User', 'id', 'uploaded_by_user');
+        return $this->belongsTo(User::class, 'id', 'uploaded_by_user');
     }
 
     // Files belong to galleries
     public function gallery()
     {
-        return $this->belongsTo('App\Models\Gallery', 'id', 'uploaded_by_user');
+        return $this->belongsTo(Gallery::class, 'id', 'uploaded_by_user');
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\File;
+use App\Models\Gallery;
 
 class User extends Model
 {
@@ -11,12 +13,12 @@ class User extends Model
     // Users can have many files
     public function files()
     {
-        return $this->hasMany('App\Models\File', 'uploaded_by_user');
+        return $this->hasMany(File::class, 'uploaded_by_user');
     }
 
     // Users can have many galleries
     public function galleries()
     {
-        return $this->hasMany('App\Models\Gallery', 'created_by_user');
+        return $this->hasMany(Gallery::class, 'created_by_user');
     }
 }
