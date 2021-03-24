@@ -16,7 +16,7 @@ class Challenge extends Model
 
     public function isValid($encodedSignature)
     {
-        $pubkey = PublicKeyLoader::load($this->key()->pubkey);
+        $pubkey = PublicKeyLoader::load($this->key->pubkey);
         $signature = base64_decode($encodedSignature);
 
         // Only validate a challenge if it hasn't been completed yet
@@ -25,8 +25,8 @@ class Challenge extends Model
                 $this->completed = true;
                 $this->save();
 
-                $this->key()->challenges_completed += 1;
-                $this->key()->save();
+                $this->key->challenges_completed += 1;
+                $this->key->save();
 
                 return true;
             } else {

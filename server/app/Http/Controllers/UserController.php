@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
+use App\Models\Challenge;
 
 class UserController extends Controller
 {
@@ -36,16 +37,14 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $input = $request->validated();
-        User::create($input);
-
-        // Validate the challenge
-
         // Create a new user account
+        $input = $request->validated();
+        $user = User::create($input);
 
         // Associate the pubkey from the challenge with the user account
-
-
+        $challenge = Challenge::where('string', $input['challenge'])->first();
+        $challenge->key->user_id = $user->id;
+        $challenge->key->save();
 
         return response(null, 201);
     }

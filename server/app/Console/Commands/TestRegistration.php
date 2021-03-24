@@ -31,6 +31,29 @@ class TestRegistration extends Command
         parent::__construct();
     }
 
+    private function generateChallenge($pubkey)
+    {
+        $payload = [
+            'pubkey' => $pubkey->toString('PSS'),
+        ];
+
+        // Set up all of our cURL options
+        $request = curl_init(env('APP_URL') . '/api/v1/challenge');
+        curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($request, CURLOPT_POST, true);
+        curl_setopt($request, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($request, CURLOPT_HTTPHEADER, array(
+            'Accept: application/json',
+            'Content-Type: application/json',
+        ));
+
+        // Submit the POST request
+        $response = curl_exec($request);
+        curl_close($request);
+
+        return json_decode($response);
+    }
+
     /**
      * Execute the console command.
      *
@@ -41,27 +64,24 @@ class TestRegistration extends Command
     public function handle()
     {
         // Generate a keypair
-
-        // Generate a challenge
-
-        // Sign the challenge
-
-        // Submit post request 
-
-
         $privateKey = RSA::createKey(4096);
         $publicKey = $privateKey->getPublicKey();
-        $testUser = "rachel";
+        dump("Keypair generated.");
 
+        // Generate a challenge
+        $response = $this->generateChallenge($publicKey);
+        dump("Challenge generated - {$response->challenge}");
+
+        // Sign the challenge
+        $signature = base64_encode($privateKey->sign($response->challenge));
+        dump("Challenge signed - {$signature}");
+
+        // Submit post request
         $payload = [
-            'name' => $testUser,
-            'pubkey' => $publicKey->toString('PSS'),
+            'name' => "rachel",
+            'challenge' => $response->challenge,
+            'signature' => $signature,
         ];
-
-        $signature = $privateKey->sign(json_encode($payload));
-        $encodedSignature = $testUser . ":" . base64_encode($signature);
-
-        $payload['signature'] = $encodedSignature;
 
         // Set up all of our cURL options
         $request = curl_init(env('APP_URL') . '/api/v1/user');
