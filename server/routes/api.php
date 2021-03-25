@@ -25,4 +25,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     Route::post('/challenge', [ChallengeController::class, 'store']);
     Route::post('/user', [UserController::class, 'store']);
+    Route::post('/file', [FileController::class, 'store']);
 });

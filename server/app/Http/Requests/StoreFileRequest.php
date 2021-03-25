@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Challenge;
 
-class StoreUserRequest extends FormRequest
+class StoreFileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,7 +14,6 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize()
     {
-        // TOOD: Make sure the user is logged out?
         return true;
     }
 
@@ -26,9 +25,11 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|unique:users',
-            'email' => 'nullable|email',
+            'title' => 'nullable|string',
             'description' => 'nullable|string',
+            'file' => 'required|file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
+            'gallery' => 'nullable|integer',
+            'read_permission' => 'nullable|string',
             'challenge' => 'required|string',
             'signature' => 'required|string',
         ];
