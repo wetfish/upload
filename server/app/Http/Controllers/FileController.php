@@ -62,6 +62,8 @@ $table->string('read_permission');
 $table->timestamps();
 */
 
+      print_r($input);
+
     }
 
     /**

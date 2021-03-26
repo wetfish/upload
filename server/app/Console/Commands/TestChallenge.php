@@ -66,9 +66,11 @@ class TestChallenge extends Command
         ));
 
         // Submit the POST request
-        $response = curl_exec($request);
+        $response = json_decode(curl_exec($request));
+        $signature = base64_encode($privateKey->sign($response->challenge));
         curl_close($request);
 
-        echo "Got response from API: " . $response;
+        dump("challenge={$response->challenge}");
+        dump("signature={$signature}");
     }
 }
