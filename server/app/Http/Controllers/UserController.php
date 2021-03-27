@@ -46,6 +46,8 @@ class UserController extends Controller
         $challenge->key->user_id = $user->id;
         $challenge->key->save();
 
+        // TODO: Check if this key uploaded any images before registering and add the new user ID
+
         return response(null, 201);
     }
 

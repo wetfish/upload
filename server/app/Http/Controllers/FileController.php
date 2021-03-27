@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreFileRequest;
+use App\Models\Challenge;
+use App\Models\User;
+use App\Models\File;
 
 class FileController extends Controller
 {
@@ -36,34 +39,27 @@ class FileController extends Controller
     public function store(StoreFileRequest $request)
     {
         $input = $request->validated();
+        $upload = new \SplFileInfo($input['file']->storePublicly('uploads'));
+        $challenge = Challenge::where('string', $input['challenge'])->first();
+
+        $file = new File;
+        $file->mime_type = $input['file']->getMimeType();
+        $file->uploaded_by_key = $challenge->key->id;
+        $file->uploaded_by_ip = $request->ip();
+        $file->system_path = "app/storage/uploads/" . $upload->getFilename();
+        $file->url_path = '/' . $upload->getFilename();
+        $file->original_file_name = $input['file']->getClientOriginalName();
+        $file->hash = hash_file("sha3-256", $input['file']->getPathname());
+        $file->read_permission = 'public';
 
         // Check if the challenge key belongs to a specific user
+        if($challenge->key->user_id) {
+            $file->uploaded_by_user = $challenge->key->user_id;
+        }
 
-        // Check the mime type
+        $file->save();
 
-        // Hash the file
-
-/*
-$table->id();
-$table->string('title')->nullable();
-$table->text('description')->nullable();
-$table->string('mime_type');
-$table->foreignId('gallery_id')->nullable()->constrained();
-$table->unsignedBigInteger('uploaded_by_key');
-$table->foreign('uploaded_by_key')->references('id')->on('keys');
-$table->unsignedBigInteger('uploaded_by_user');
-$table->foreign('uploaded_by_user')->references('id')->on('users');
-$table->string('uploaded_by_ip');
-$table->string('file_path', 2048);
-$table->string('url_path', 2048);
-$table->string('original_file_name', 2048);
-$table->string('hash');
-$table->string('read_permission');
-$table->timestamps();
-*/
-
-      print_r($input);
-
+        return response()->json(['file_url' => env('FILE_URL') . $file->url_path], 201);
     }
 
     /**

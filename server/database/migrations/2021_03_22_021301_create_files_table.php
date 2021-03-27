@@ -24,7 +24,7 @@ class CreateFilesTable extends Migration
             $table->unsignedBigInteger('uploaded_by_user');
             $table->foreign('uploaded_by_user')->references('id')->on('users');
             $table->string('uploaded_by_ip');
-            $table->string('file_path', 2048);
+            $table->string('system_path', 2048);
             $table->string('url_path', 2048);
             $table->string('original_file_name', 2048);
             $table->string('hash');
