@@ -39,15 +39,20 @@ class FileController extends Controller
     public function store(StoreFileRequest $request)
     {
         $input = $request->validated();
-        $upload = new \SplFileInfo($input['file']->storePublicly('uploads'));
         $challenge = Challenge::where('string', $input['challenge'])->first();
 
+        // Try to determine the file extension based on the MIME type
+        $extension = $input['file']->guessExtension();
+        $filename = File::uniqueName($extension);
+        $input['file']->storePubliclyAs('uploads', $filename);
+
+        // By now the file is stored on disk, so let's save it to the database!
         $file = new File;
         $file->mime_type = $input['file']->getMimeType();
         $file->uploaded_by_key = $challenge->key->id;
         $file->uploaded_by_ip = $request->ip();
-        $file->system_path = "app/storage/uploads/" . $upload->getFilename();
-        $file->url_path = '/' . $upload->getFilename();
+        $file->system_path = "app/storage/uploads/" . $filename;
+        $file->url_path = '/' . $filename;
         $file->original_file_name = $input['file']->getClientOriginalName();
         $file->hash = hash_file("sha3-256", $input['file']->getPathname());
         $file->read_permission = 'public';
