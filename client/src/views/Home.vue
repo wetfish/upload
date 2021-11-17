@@ -1,18 +1,24 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    Upload a file!
+
+    <h1>Development Todo</h1>
+
+    <ul style="width: 250px; margin: 0 auto; text-align: left">
+      <li>Generate / Load a keypair</li>
+      <li>Test signing arbitrary data</li>
+      <li>Sign a challenge from the API</li>
+      <li>Actually upload a file!!!</li>
+      <li>Implement user registration</li>
+    </ul>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
   name: 'Home',
   components: {
-    HelloWorld
   }
 }
 </script>
