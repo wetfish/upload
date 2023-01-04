@@ -3,10 +3,6 @@ import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
-
   <div class="home">
     Upload a file!
 
@@ -14,7 +10,7 @@ import TheWelcome from '../components/TheWelcome.vue'
 
     <ul style="width: 250px; margin: 0 auto; text-align: left">
       <li><s>Generate / Load a keypair</s></li>
-      <li>Test signing arbitrary data</li>
+      <li><s>Test signing arbitrary data</s></li>
       <li>Sign a challenge from the API</li>
       <li>Actually upload a file!!!</li>
       <li>Implement user registration</li>
@@ -23,13 +19,23 @@ import TheWelcome from '../components/TheWelcome.vue'
 </template>
 
 <script>
+/*
+Convert an ArrayBuffer into a string
+from https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string/
+*/
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+}
+
 export default {
   name: 'Home',
   components: {
   },
 
   async created() {
-    console.log("Hi there!");
+    if(window.isSecureContext) {
+      console.log('its secure');
+    }
 
     const keyPair = await crypto.subtle.generateKey(
       {
@@ -39,12 +45,42 @@ export default {
         hash: "SHA-256",
       },
 
-      false, // Don't allow this key to be exported
+      true, // TODO: SET THIS BACK TO FALSE!!! // Don't allow this key to be exported
 
       ["sign", "verify"] // Permissions needed by this key
     );
 
-    console.log(keyPair);
+    let encoder = new TextEncoder();
+    let encodedMessage = encoder.encode("hello world");
+
+    let signature = await window.crypto.subtle.sign(
+      {
+        name: "RSA-PSS",
+        saltLength: 32,
+      },
+      keyPair.privateKey,
+      encodedMessage
+    );
+
+    let buffer = new Uint8Array(signature, 0, 512);
+
+    console.log("Key Pair", keyPair);
+
+    const signatureAsString = ab2str(buffer);
+    const signatureAsBase64 = window.btoa(signatureAsString);
+
+    console.log("Generated signature", signatureAsBase64);
+
+    const exported = await window.crypto.subtle.exportKey(
+       "pkcs8",
+       keyPair.privateKey
+     );
+
+     const exportedAsString = ab2str(exported);
+     const exportedAsBase64 = window.btoa(exportedAsString);
+     const pemExported = `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64}\n-----END PRIVATE KEY-----`;
+
+     console.log(pemExported);
   },
 }
 </script>
