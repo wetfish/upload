@@ -26,8 +26,13 @@ class File extends Model
     public static function uniqueName($extension)
     {
         // Estimate the total number of files uploaded based on the largest file ID
-        $newest = self::orderByDesc('id')->first();
-        $length = strlen($newest->id);
+        $newestUpload = self::orderByDesc('id')->first();
+        $length = 0;
+
+        // It's possible that there aren't any files uploaded
+        if($newestUpload) {
+          $length = strlen($newestUpload->id);
+        }
 
         // Enforce a minimum filename length of 2, 1 character long filenames are weird
         if($length < 2) {
