@@ -1,10 +1,6 @@
 <script setup>
-  if(window.isSecureContext) {
+if(window.isSecureContext) {
     console.log('Using secure context.');
-  }
-
-  function ab2str(buf) {
-    return String.fromCharCode.apply(null, new Uint8Array(buf));
   }
 </script>
 
@@ -24,15 +20,34 @@
 
     <hr style="margin: 1em 0" />
 
-    <button @click="fetchChallenge">Fetch API Challenge</button>
+    <div>
+      <button @click="generateKeyPair">Generate Key Pair</button>
+      <button @click="fetchChallenge">Fetch API Challenge</button>
+      <button @click="signChallenge">Sign Challenge</button>
+    </div>
+
+    <div>
+      <textarea rows="5" cols="60">{{ pubKey }}</textarea>
+    </div>
+
+    <div>
+      <textarea rows="5" cols="60">{{ challenge }}</textarea>
+    </div>
+
+    <div>
+      <textarea rows="5" cols="60">{{ signedChallenge }}</textarea>
+    </div>
   </div>
 </template>
 
 <script>
-/*
-Convert an ArrayBuffer into a string
-from https://developer.chrome.com/blog/how-to-convert-arraybuffer-to-and-from-string/
-*/
+import { ref } from 'vue';
+
+const keyPair = ref({});
+const pubKey = ref('');
+const challenge = ref('');
+const signedChallenge = ref('');
+
 function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
@@ -44,7 +59,7 @@ export default {
 
   methods: {
     async generateKeyPair() {
-      const keyPair = await crypto.subtle.generateKey(
+      const generatedKey = await crypto.subtle.generateKey(
         {
           name: "RSA-PSS",
           modulusLength: 4096,
@@ -52,80 +67,61 @@ export default {
           hash: "SHA-256",
         },
 
-        true, // TODO: SET THIS BACK TO FALSE!!! // Don't allow this key to be exported
+        true,
 
         ["sign", "verify"] // Permissions needed by this key
       );
 
-        return keyPair;
+      keyPair.value = generatedKey;
+      this.getPubkey();
     },
 
-    async getPubkey(keyPair) {
+    async getPubkey() {
       const exported = await window.crypto.subtle.exportKey(
        "spki",
-       keyPair.publicKey
+       keyPair.value.publicKey
      );
 
       const exportedAsString = ab2str(exported);
       const exportedAsBase64 = window.btoa(exportedAsString);
 
-      return `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`;
+      pubKey.value = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`;
     },
 
     async fetchChallenge() {
-      const keyPair = await this.generateKeyPair();
-      const pubkey = await this.getPubkey(keyPair);
-
       const options = {
         method: "POST",
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({pubkey}),
+        body: JSON.stringify({pubkey: pubKey.value}),
       };
 
       const response = await fetch("http://upload.local/api/v1/challenge", options);
-      const challenge = await response.json();
-
-      console.log(challenge);
+      challenge.value = await response.json();
     },
-  },
 
-  async created() {
-    /*
-    let encoder = new TextEncoder();
-    let encodedMessage = encoder.encode("hello world");
+    async signChallenge() {
+      let encoder = new TextEncoder();
+      let encodedMessage = encoder.encode(challenge.value);
 
-    let signature = await window.crypto.subtle.sign(
-      {
-        name: "RSA-PSS",
-        saltLength: 32,
-      },
-      keyPair.privateKey,
-      encodedMessage
-    );
+      let signature = await window.crypto.subtle.sign(
+        {
+          name: "RSA-PSS",
+          saltLength: 32,
+        },
+        keyPair.value.privateKey,
+        encodedMessage
+      );
 
-    let buffer = new Uint8Array(signature, 0, 512);
+      let buffer = new Uint8Array(signature, 0, 512);
 
-    console.log("Key Pair", keyPair);
+      const signatureAsString = ab2str(buffer);
+      const signatureAsBase64 = window.btoa(signatureAsString);
 
-    const signatureAsString = ab2str(buffer);
-    const signatureAsBase64 = window.btoa(signatureAsString);
-
-    console.log("Generated signature", signatureAsBase64);
-
-    const exported = await window.crypto.subtle.exportKey(
-       "pkcs8",
-       keyPair.privateKey
-     );
-
-     const exportedAsString = ab2str(exported);
-     const exportedAsBase64 = window.btoa(exportedAsString);
-     const pemExported = `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64}\n-----END PRIVATE KEY-----`;
-
-     console.log(pemExported);
-    */
+      signedChallenge.value = signatureAsBase64;
+    }
   },
 }
 </script>
