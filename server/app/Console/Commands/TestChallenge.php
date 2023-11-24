@@ -46,7 +46,7 @@ class TestChallenge extends Command
             $publicKey = $privateKey->getPublicKey();
             dump("Keypair generated");
         } else {
-            $privateKey = RSA::loadFormat('PSS', file_get_contents($keyfile));
+            $privateKey = RSA::loadFormat('PKCS8', file_get_contents($keyfile));
             $publicKey = $privateKey->getPublicKey();
             dump("Keypair loaded from {$keyfile}");
         }

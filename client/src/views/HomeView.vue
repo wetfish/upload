@@ -20,19 +20,23 @@ if(window.isSecureContext) {
 
     <hr style="margin: 1em 0" />
 
+    <button @click="generateKeyPair">Generate Key Pair</button>
+
     <div>
-      <button @click="generateKeyPair">Generate Key Pair</button>
-      <button @click="fetchChallenge">Fetch API Challenge</button>
-      <button @click="signChallenge">Sign Challenge</button>
+      <textarea rows="5" cols="60">{{ privkey }}</textarea>
     </div>
 
     <div>
-      <textarea rows="5" cols="60">{{ pubKey }}</textarea>
+      <textarea rows="5" cols="60">{{ pubkey }}</textarea>
     </div>
+
+    <button @click="fetchChallenge">Fetch API Challenge</button>
 
     <div>
       <textarea rows="5" cols="60">{{ challenge }}</textarea>
     </div>
+
+    <button @click="signChallenge">Sign Challenge</button>
 
     <div>
       <textarea rows="5" cols="60">{{ signedChallenge }}</textarea>
@@ -44,7 +48,8 @@ if(window.isSecureContext) {
 import { ref } from 'vue';
 
 const keyPair = ref({});
-const pubKey = ref('');
+const privkey = ref('');
+const pubkey = ref('');
 const challenge = ref('');
 const signedChallenge = ref('');
 
@@ -73,7 +78,20 @@ export default {
       );
 
       keyPair.value = generatedKey;
+      this.getPrivkey();
       this.getPubkey();
+    },
+
+    async getPrivkey() {
+      const exported = await window.crypto.subtle.exportKey(
+       "pkcs8",
+       keyPair.value.privateKey
+     );
+
+      const exportedAsString = ab2str(exported);
+      const exportedAsBase64 = window.btoa(exportedAsString);
+
+      privkey.value = `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64}\n-----END PRIVATE KEY-----`;
     },
 
     async getPubkey() {
@@ -85,7 +103,7 @@ export default {
       const exportedAsString = ab2str(exported);
       const exportedAsBase64 = window.btoa(exportedAsString);
 
-      pubKey.value = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`;
+      pubkey.value = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`;
     },
 
     async fetchChallenge() {
@@ -95,11 +113,12 @@ export default {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({pubkey: pubKey.value}),
+        body: JSON.stringify({pubkey: pubkey.value}),
       };
 
       const response = await fetch("http://upload.local/api/v1/challenge", options);
-      challenge.value = await response.json();
+      const responseJson = await response.json();
+      challenge.value = responseJson.challenge;
     },
 
     async signChallenge() {
