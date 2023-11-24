@@ -13,8 +13,8 @@ if(window.isSecureContext) {
     <ul style="width: 250px; margin: 0 auto; text-align: left">
       <li><s>Generate / Load a keypair</s></li>
       <li><s>Test signing arbitrary data</s></li>
-      <li>Sign a challenge from the API</li>
-      <li>Actually upload a file!!!</li>
+      <li><s>Sign a challenge from the API</s></li>
+      <li><s>Actually upload a file!!!</s></li>
       <li>Implement user registration</li>
     </ul>
 
@@ -41,6 +41,19 @@ if(window.isSecureContext) {
     <div>
       <textarea rows="5" cols="60">{{ signedChallenge }}</textarea>
     </div>
+
+    <div>
+      <input type="file" ref="file">
+      <button @click="upload">Upload</button>
+    </div>
+
+    <div v-if="uploadedFile">
+      <p>
+        File uploaded!!
+      </p>
+
+      <img :src="uploadedFile" />
+    </div>
   </div>
 </template>
 
@@ -52,6 +65,8 @@ const privkey = ref('');
 const pubkey = ref('');
 const challenge = ref('');
 const signedChallenge = ref('');
+const file = ref();
+const uploadedFile = ref('');
 
 function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
@@ -140,6 +155,29 @@ export default {
       const signatureAsBase64 = window.btoa(signatureAsString);
 
       signedChallenge.value = signatureAsBase64;
+    },
+
+    async upload() {
+      const data = new FormData();
+      data.append('challenge', challenge.value);
+      data.append('signature', signedChallenge.value);
+      data.append('file', file.value.files[0]);
+
+      const options = {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+        },
+        body: data,
+      };
+
+      console.log(options);
+      console.log(data);
+
+      const response = await fetch('http://upload.local/api/v1/file', options);
+      const responseJson = await response.json();
+
+      uploadedFile.value = responseJson.file_url;
     }
   },
 }
