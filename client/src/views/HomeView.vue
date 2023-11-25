@@ -15,6 +15,9 @@ if(window.isSecureContext) {
       <li><s>Test signing arbitrary data</s></li>
       <li><s>Sign a challenge from the API</s></li>
       <li><s>Actually upload a file!!!</s></li>
+      <li><s>Debug max file upload size</s></li>
+      <li><s>Test multiple file uploads</s></li>
+      <li>Display all uploaded files on home page</li>
       <li>Implement user registration</li>
     </ul>
 
@@ -43,16 +46,18 @@ if(window.isSecureContext) {
     </div>
 
     <div>
-      <input type="file" ref="file">
+      <input type="file" multiple ref="file">
       <button @click="upload">Upload</button>
     </div>
 
-    <div v-if="uploadedFile">
+    <div v-if="uploadedFiles">
       <p>
-        File uploaded!!
+        File(s) uploaded!!
       </p>
 
-      <img :src="uploadedFile" />
+      <div v-for="(uploadedFile, index) in uploadedFiles">
+        <img :src="uploadedFile" />
+      </div>
     </div>
   </div>
 </template>
@@ -66,7 +71,7 @@ const pubkey = ref('');
 const challenge = ref('');
 const signedChallenge = ref('');
 const file = ref();
-const uploadedFile = ref('');
+const uploadedFiles = ref([]);
 
 function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
@@ -161,7 +166,10 @@ export default {
       const data = new FormData();
       data.append('challenge', challenge.value);
       data.append('signature', signedChallenge.value);
-      data.append('file', file.value.files[0]);
+
+      for (const selectedFile of file.value.files) {
+        data.append('file[]', selectedFile);
+      }
 
       const options = {
         method: "POST",
@@ -171,13 +179,10 @@ export default {
         body: data,
       };
 
-      console.log(options);
-      console.log(data);
-
       const response = await fetch('http://upload.local/api/v1/file', options);
       const responseJson = await response.json();
 
-      uploadedFile.value = responseJson.file_url;
+      uploadedFiles.value.push(...responseJson.uploadedFiles);
     }
   },
 }

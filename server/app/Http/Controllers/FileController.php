@@ -40,31 +40,35 @@ class FileController extends Controller
     {
         $input = $request->validated();
         $challenge = Challenge::where('string', $input['challenge'])->first();
+        $uploadedFiles = [];
 
-        // Try to determine the file extension based on the MIME type
-        $extension = $input['file']->guessExtension();
-        $filename = File::uniqueName($extension);
-        $input['file']->storePubliclyAs('uploads', $filename);
+        foreach($request->file('file') as $uploadedFile) {
+            // Try to determine the file extension based on the MIME type
+            $extension = $uploadedFile->guessExtension();
+            $filename = File::uniqueName($extension);
+            $uploadedFile->storePubliclyAs('uploads', $filename);
 
-        // By now the file is stored on disk, so let's save it to the database!
-        $file = new File;
-        $file->mime_type = $input['file']->getMimeType();
-        $file->uploaded_by_key = $challenge->key->id;
-        $file->uploaded_by_ip = $request->ip();
-        $file->system_path = "app/storage/uploads/" . $filename;
-        $file->url_path = '/' . $filename;
-        $file->original_file_name = $input['file']->getClientOriginalName();
-        $file->hash = hash_file("sha3-256", $input['file']->getPathname());
-        $file->read_permission = 'public';
+            // By now the file is stored on disk, so let's save it to the database!
+            $file = new File;
+            $file->mime_type = $uploadedFile->getMimeType();
+            $file->uploaded_by_key = $challenge->key->id;
+            $file->uploaded_by_ip = $request->ip();
+            $file->system_path = "app/storage/uploads/" . $filename;
+            $file->url_path = '/' . $filename;
+            $file->original_file_name = $uploadedFile->getClientOriginalName();
+            $file->hash = hash_file("sha3-256", $uploadedFile->getPathname());
+            $file->read_permission = 'public';
 
-        // Check if the challenge key belongs to a specific user
-        if($challenge->key->user_id) {
-            $file->uploaded_by_user = $challenge->key->user_id;
+            // Check if the challenge key belongs to a specific user
+            if($challenge->key->user_id) {
+                $file->uploaded_by_user = $challenge->key->user_id;
+            }
+
+            $file->save();
+            $uploadedFiles[] = env('FILE_URL') . $file->url_path;
         }
 
-        $file->save();
-
-        return response()->json(['file_url' => env('FILE_URL') . $file->url_path], 201);
+        return response()->json(['uploadedFiles' => $uploadedFiles], 201);
     }
 
     /**

@@ -27,7 +27,12 @@ class StoreFileRequest extends FormRequest
         return [
             'title' => 'nullable|string',
             'description' => 'nullable|string',
-            'file' => 'required|file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
+            'file' => 'required',
+            'file.1' => 'file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
+            'file.2' => 'file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
+            'file.3' => 'file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
+            'file.4' => 'file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
+            'file.5' => 'file|mimes:jpg,bmp,png,gif,webm,webp,mp3,mp4,wav,ogg,ogv',
             'gallery' => 'nullable|integer',
             'read_permission' => 'nullable|string',
             'challenge' => 'required|string',
