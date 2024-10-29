@@ -17,6 +17,8 @@ if(window.isSecureContext) {
       <li><s>Actually upload a file!!!</s></li>
       <li><s>Debug max file upload size</s></li>
       <li><s>Test multiple file uploads</s></li>
+      <li>Store key in localstorage</li>
+      <li>Automatically fetch and sign challenges</li>
       <li>Display all uploaded files on home page</li>
       <li>Implement user registration</li>
     </ul>
@@ -50,9 +52,9 @@ if(window.isSecureContext) {
       <button @click="upload">Upload</button>
     </div>
 
-    <div v-if="uploadedFiles">
+    <div v-if="uploadedFiles.length">
       <p>
-        File(s) uploaded!!
+        File<span v-if="uploadedFiles.length > 1">s</span> uploaded!!
       </p>
 
       <div v-for="(uploadedFile, index) in uploadedFiles">
